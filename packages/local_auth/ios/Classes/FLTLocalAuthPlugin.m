@@ -71,9 +71,10 @@
   LAContext *context = [[LAContext alloc] init];
   NSError *authError = nil;
   NSMutableArray<NSString *> *biometrics = [[NSMutableArray<NSString *> alloc] init];
-  if ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
+  if ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthentication
                            error:&authError]) {
     if (authError == nil) {
+      [biometrics addObject:@"passcode"];
       if (@available(iOS 11.0.1, *)) {
         if (context.biometryType == LABiometryTypeFaceID) {
           [biometrics addObject:@"face"];
@@ -98,16 +99,18 @@
   self.lastResult = nil;
   context.localizedFallbackTitle = @"";
 
-  if ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
+  if ([context canEvaluatePolicy:LAPolicyDeviceOwnerAuthentication
                            error:&authError]) {
-    [context evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
+    [context evaluatePolicy:LAPolicyDeviceOwnerAuthentication
             localizedReason:arguments[@"localizedReason"]
                       reply:^(BOOL success, NSError *error) {
                         if (success) {
-                          result(@YES);
+                          result(@1);
                         } else {
                           switch (error.code) {
                             case LAErrorPasscodeNotSet:
+                                result(@2);
+                                return;
                             case LAErrorTouchIDNotAvailable:
                             case LAErrorTouchIDNotEnrolled:
                             case LAErrorTouchIDLockout:
@@ -122,7 +125,7 @@
                                 return;
                               }
                           }
-                          result(@NO);
+                          result(@0);
                         }
                       }];
   } else {
