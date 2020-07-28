@@ -17,7 +17,7 @@ import 'package:platform/platform.dart';
 import 'auth_strings.dart';
 import 'error_codes.dart';
 
-enum BiometricType { face, fingerprint, iris }
+enum BiometricType { face, fingerprint, iris, passcode }
 
 const MethodChannel _channel = MethodChannel('plugins.flutter.io/local_auth');
 
@@ -66,7 +66,7 @@ class LocalAuthentication {
   /// authentication (e.g. lack of relevant hardware). This might throw
   /// [PlatformException] with error code [otherOperatingSystem] on the iOS
   /// simulator.
-  Future<bool> authenticateWithBiometrics({
+  Future<int> authenticateWithBiometrics({
     @required String localizedReason,
     bool useErrorDialogs = true,
     bool stickyAuth = false,
@@ -92,7 +92,7 @@ class LocalAuthentication {
               'operating systems.',
           details: 'Your operating system is ${_platform.operatingSystem}');
     }
-    return await _channel.invokeMethod<bool>(
+    return await _channel.invokeMethod<int>(
         'authenticateWithBiometrics', args);
   }
 
@@ -127,6 +127,9 @@ class LocalAuthentication {
     final List<BiometricType> biometrics = <BiometricType>[];
     result.forEach((String value) {
       switch (value) {
+          case 'passcode':
+              biometrics.add(BiometricType.passcode);
+              break;
         case 'face':
           biometrics.add(BiometricType.face);
           break;
