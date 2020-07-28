@@ -21,6 +21,8 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.plugins.localauth.AuthenticationHelper.AuthCompletionHandler;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import android.app.KeyguardManager;
+import android.content.Context;
 
 /**
  * Flutter plugin providing access to local authentication.
@@ -99,14 +101,14 @@ public class LocalAuthPlugin implements MethodCallHandler, FlutterPlugin, Activi
                 @Override
                 public void onSuccess() {
                   if (authInProgress.compareAndSet(true, false)) {
-                    result.success(true);
+                    result.success(1);
                   }
                 }
 
                 @Override
-                public void onFailure() {
+                public void onFailure(int code) {
                   if (authInProgress.compareAndSet(true, false)) {
-                    result.success(false);
+                    result.success(code);
                   }
                 }
 
@@ -125,6 +127,12 @@ public class LocalAuthPlugin implements MethodCallHandler, FlutterPlugin, Activi
           return;
         }
         ArrayList<String> biometrics = new ArrayList<String>();
+        KeyguardManager kManager = (KeyguardManager) activity.getSystemService(Context.KEYGUARD_SERVICE);
+        System.out.print(kManager.isKeyguardSecure());
+        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && kManager.isDeviceSecure())
+                || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && kManager.isKeyguardSecure()))
+          biometrics.add("passcode");
+
         PackageManager packageManager = activity.getPackageManager();
         if (Build.VERSION.SDK_INT >= 23) {
           if (packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
