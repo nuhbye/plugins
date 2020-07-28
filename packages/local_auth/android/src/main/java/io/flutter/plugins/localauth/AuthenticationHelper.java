@@ -48,7 +48,7 @@ class AuthenticationHelper extends BiometricPrompt.AuthenticationCallback
      * Called when authentication failed due to user. For instance, when user cancels the auth or
      * quits the app.
      */
-    void onFailure();
+    void onFailure(int code);
 
     /**
      * Called when authentication fails due to non-user related problems such as system errors,
@@ -87,7 +87,8 @@ class AuthenticationHelper extends BiometricPrompt.AuthenticationCallback
             .setDescription((String) call.argument("localizedReason"))
             .setTitle((String) call.argument("signInTitle"))
             .setSubtitle((String) call.argument("fingerprintHint"))
-            .setNegativeButtonText((String) call.argument("cancelButton"))
+            .setDeviceCredentialAllowed(true)
+//            .setNegativeButtonText((String) call.argument("cancelButton"))
             .setConfirmationRequired((Boolean) call.argument("sensitiveTransaction"))
             .build();
   }
@@ -157,11 +158,11 @@ class AuthenticationHelper extends BiometricPrompt.AuthenticationCallback
         if (activityPaused && isAuthSticky) {
           return;
         } else {
-          completionHandler.onFailure();
+          completionHandler.onFailure(0);
         }
         break;
       default:
-        completionHandler.onFailure();
+        completionHandler.onFailure(0);
     }
     stop();
   }
@@ -226,7 +227,7 @@ class AuthenticationHelper extends BiometricPrompt.AuthenticationCallback
         new OnClickListener() {
           @Override
           public void onClick(DialogInterface dialog, int which) {
-            completionHandler.onFailure();
+            completionHandler.onFailure(0);
             stop();
             activity.startActivity(new Intent(Settings.ACTION_SECURITY_SETTINGS));
           }
@@ -235,7 +236,7 @@ class AuthenticationHelper extends BiometricPrompt.AuthenticationCallback
         new OnClickListener() {
           @Override
           public void onClick(DialogInterface dialog, int which) {
-            completionHandler.onFailure();
+            completionHandler.onFailure(0);
             stop();
           }
         };
